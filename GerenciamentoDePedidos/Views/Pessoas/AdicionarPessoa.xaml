@@ -1,0 +1,17 @@
+﻿<Window x:Class="GerenciamentoDePedidos.Views.AdicionarPessoa"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Adicionar Pessoa" Height="250" Width="350">
+    <StackPanel Margin="10">
+        <Label Content="Nome:"/>
+        <TextBox x:Name="TxtNome" Margin="0,0,0,10" />
+
+        <Label Content="CPF:"/>
+        <TextBox x:Name="TxtCpf" Margin="0,0,0,10" />
+
+        <Label Content="Endereço:"/>
+        <TextBox x:Name="TxtEndereco" Margin="0,0,0,10"/>
+
+        <Button Content="Salvar" Click="BtnSalvar_Click"/>
+    </StackPanel>
+</Window>

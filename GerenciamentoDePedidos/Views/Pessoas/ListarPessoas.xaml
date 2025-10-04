@@ -1,0 +1,13 @@
+﻿<Window x:Class="GerenciamentoDePedidos.Views.ListarPessoasWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Pessoas Cadastradas" Height="350" Width="500">
+    <DockPanel Margin="10">
+    <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,10" HorizontalAlignment="Left">
+        <Button x:Name="BtnAdicionarPessoa" Content="Adicionar Pessoa" Width="150" Margin="0,0,10,0" Click="BtnAdicionarPessoa_Click"/>
+    </StackPanel>
+        <Grid Margin="10">
+            <DataGrid x:Name="PessoasDataGrid" AutoGenerateColumns="True" />
+        </Grid>
+    </DockPanel>
+</Window>
