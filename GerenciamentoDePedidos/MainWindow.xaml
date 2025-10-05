@@ -4,14 +4,14 @@
         Title="Gerenciamento de Pedidos" Height="450" Width="800">
     <DockPanel Margin="10">
         <!-- Painel de Botões -->
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,10" HorizontalAlignment="Left">
-            <Button x:Name="BtnAdicionarProduto" Content="Adicionar Produto" Width="150" Margin="0,0,10,0" Click="BtnAdicionarProduto_Click"/>
-            <Button x:Name="BtnAdicionarPedido" Content="Adicionar Pedido" Width="150" Margin="0,0,10,0" Click="BtnAdicionarPedido_Click"/>
-            <Button x:Name="BtnListarPessoas" Content="Listar Pessoas" Width="150" Margin="0,0,10,0" Click="BtnListarPessoas_Click"/>
-            <Button x:Name="BtnListarProdutos" Content="Listar Produtos" Width="150" Click="BtnListarProdutos_Click"/>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,10" HorizontalAlignment="Center" >
+            <Button x:Name="BtnListarPedidos" Content="Pedidos" Width="150" Margin="0,0,10,0"   Click="BtnListarPedidos_Click"/>
+            <Button x:Name="BtnListarProdutos" Content="Produtos" Width="150" Margin="0,0,10,0" Click="BtnListarProdutos_Click"/>
+            <Button x:Name="BtnListarPessoas" Content="Pessoas" Width="150"                     Click="BtnListarPessoas_Click"/>
         </StackPanel>
 
-        <!-- Lista de Pedidos -->
-        <DataGrid x:Name="PedidosDataGrid" AutoGenerateColumns="True" DockPanel.Dock="Bottom" />
+        <GroupBox Header="Últimos 5 Pedidos" DockPanel.Dock="Bottom" FontWeight="Bold">
+            <DataGrid x:Name="PedidosDataGrid" AutoGenerateColumns="True" IsReadOnly="True" Height="300" Margin="0,10,0,0"/>
+        </GroupBox>
     </DockPanel>
 </Window>

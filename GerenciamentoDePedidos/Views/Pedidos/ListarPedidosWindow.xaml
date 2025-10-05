@@ -21,6 +21,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <Button Content="Editar" Margin="0,0,5,0" Click="BtnEditarPedido_Click"/>
                                 <Button Content="Excluir" Click="BtnExcluirPedido_Click"/>
+                                <Button Content="Details" Click="BtnDetailsPedido_Click"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

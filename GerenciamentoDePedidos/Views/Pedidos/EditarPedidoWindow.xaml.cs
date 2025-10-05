@@ -10,28 +10,28 @@ namespace GerenciamentoDePedidos.Views.Pedidos
     /// <summary>
     /// Lógica interna para EditarPedidoWindow.xaml
     /// </summary>
+
     public partial class EditarPedidoWindow : Window
     {
         private Pedido pedido;
-        private List<Pessoa> pessoas;
         private List<Produto> produtos;
 
         public EditarPedidoWindow(int idPedido)
         {
             InitializeComponent();
-            pedido = DatabaseRepository.CarregarPedidos().Where(p=>p.Id == idPedido).First();
-            pessoas = DatabaseRepository.CarregarPessoas();
+
+            pedido = DatabaseRepository.CarregarPedidos().First(p => p.Id == idPedido);
             produtos = DatabaseRepository.CarregarProdutos();
+            ProdutoComboBox.ItemsSource = produtos;
 
             CarregarCampos();
         }
 
         private void CarregarCampos()
         {
-            PessoaComboBox.ItemsSource = pessoas;
-            PessoaComboBox.DisplayMemberPath = "Nome";
-            PessoaComboBox.SelectedValuePath = "Id";
-            PessoaComboBox.SelectedValue = pedido.IdPessoa;
+            // Pessoa fixa (não pode ser alterada)
+            PessoaTextBlock.Text = DatabaseRepository.CarregarPessoas()
+                .First(p => p.Id == pedido.IdPessoa).Nome;
 
             FormaPagamentoComboBox.ItemsSource = Enum.GetValues(typeof(EnumFormaPagamento));
             FormaPagamentoComboBox.SelectedItem = pedido.FormaPagamento;
@@ -39,39 +39,111 @@ namespace GerenciamentoDePedidos.Views.Pedidos
             StatusComboBox.ItemsSource = Enum.GetValues(typeof(EnumStatusVenda));
             StatusComboBox.SelectedItem = pedido.StatusVenda;
 
-            ProdutosListBox.ItemsSource = produtos;
-            ProdutosListBox.DisplayMemberPath = "Nome";
-            ProdutosListBox.SelectedValuePath = "Id";
-            foreach (var idProd in pedido.IdProdutos)
-            {
-                var item = produtos.FirstOrDefault(p => p.Id == idProd);
-                if (item != null)
-                    ProdutosListBox.SelectedItems.Add(item);
-            }
-
-            ValorTotalTextBox.Text = pedido.CalcularValorTotal().ToString("C");
-            ProdutosListBox.SelectionChanged += ProdutosListBox_SelectionChanged;
+            AtualizarListaProdutos();
+            AtualizarValorTotal();
         }
 
-        private void ProdutosListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void AtualizarListaProdutos()
         {
-            var idsSelecionados = ProdutosListBox.SelectedItems.Cast<Produto>().Select(p => p.Id).ToList();
-            pedido.IdProdutos = idsSelecionados;
-            ValorTotalTextBox.Text = pedido.CalcularValorTotal().ToString("C");
+            // 1️⃣ Carrega todos os produtos do sistema
+            var todosProdutos = DatabaseRepository.CarregarProdutos();
+            // 2️⃣ Monta uma lista combinando os dados do pedido e dos produtos
+            var produtosPedido = pedido.Produtos
+                .Select(pp =>
+                {
+                    // Busca o produto correspondente pelo Id
+                    var produto = todosProdutos.FirstOrDefault(p => p.Id == pp.IdProduto);
+
+                    // Evita erro caso algum produto tenha sido removido do banco
+                    if (produto == null)
+                        return null;
+
+                    // Retorna um objeto anônimo com todos os dados que queremos mostrar
+                    return new
+                    {
+                        Nome = produto.Nome,
+                        Quantidade = pp.Quantidade,
+                        PrecoUnitario = produto.Valor,
+                        Subtotal = produto.Valor * pp.Quantidade
+                    };
+                })
+                .Where(p => p != null) // Remove nulos, se algum produto não for encontrado
+                .ToList();
+
+            // 3️⃣ Exibe na interface (por exemplo, ListBox ou DataGrid)
+            ProdutosListBox.ItemsSource = null;
+            ProdutosListBox.ItemsSource = produtosPedido;
+        }
+
+        private void AtualizarValorTotal()
+        {
+            ValorTotalTextBox.Text = pedido.CalcularValorTotal().ToString("C2");
+        }
+
+        private void BtnAdicionarProduto_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProdutoComboBox.SelectedItem == null)
+            {
+                MessageBox.Show("Selecione um produto para adicionar.");
+                return;
+            }
+
+            var produtoSelecionado = (Produto)ProdutoComboBox.SelectedItem;
+
+            var existente = pedido.Produtos.FirstOrDefault(p => p.IdProduto == produtoSelecionado.Id);
+            if (existente != null)
+            {
+                existente.Quantidade++;
+            }
+            else
+            {
+                pedido.Produtos.Add(new PedidoProduto
+                {
+                    IdProduto = produtoSelecionado.Id,
+                    NomeProduto = produtoSelecionado.Nome,
+                    Quantidade = 1
+                });
+            }
+
+            AtualizarListaProdutos();
+            AtualizarValorTotal();
+        }
+
+        private void BtnRemoverProduto_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProdutosListBox.SelectedItem == null)
+            {
+                MessageBox.Show("Selecione um produto para remover.");
+                return;
+            }
+
+            dynamic produtoSelecionado = ProdutosListBox.SelectedItem;
+
+            // Pega o nome ou o ID (dependendo do que você mostra)
+            var nome = produtoSelecionado.Nome;
+
+            // Encontra no pedido real
+            var todosProdutos = DatabaseRepository.CarregarProdutos();
+            var produto = todosProdutos.FirstOrDefault(p => p.Nome == nome);
+
+            if (produto != null)
+            {
+                pedido.RemoverProduto(produto.Id);
+                AtualizarListaProdutos();
+                AtualizarValorTotal();
+            }
         }
 
         private void BtnSalvar_Click(object sender, RoutedEventArgs e)
         {
-            if (PessoaComboBox.SelectedValue == null || ProdutosListBox.SelectedItems.Count == 0)
+            if (pedido.Produtos == null || pedido.Produtos.Count == 0)
             {
-                MessageBox.Show("Selecione uma pessoa e pelo menos um produto.");
+                MessageBox.Show("Adicione ao menos um produto ao pedido.");
                 return;
             }
 
-            pedido.IdPessoa = (int)PessoaComboBox.SelectedValue;
             pedido.FormaPagamento = (EnumFormaPagamento)FormaPagamentoComboBox.SelectedItem;
             pedido.StatusVenda = (EnumStatusVenda)StatusComboBox.SelectedItem;
-            pedido.IdProdutos = ProdutosListBox.SelectedItems.Cast<Produto>().Select(p => p.Id).ToList();
             pedido.ValorTotal = pedido.CalcularValorTotal();
 
             DatabaseRepository.AtualizarPedido(pedido);

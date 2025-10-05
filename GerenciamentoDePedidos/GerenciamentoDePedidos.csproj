@@ -59,8 +59,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Core\Entities\PedidoProduto.cs" />
+    <Compile Include="ViewModels\ProdutoPedidoViewModel.cs" />
     <Compile Include="Views\Pedidos\AdicionarPedidoWindow.xaml.cs">
       <DependentUpon>AdicionarPedidoWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Pedidos\DetalhePedido.xaml.cs">
+      <DependentUpon>DetalhePedido.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Pedidos\EditarPedidoWindow.xaml.cs">
       <DependentUpon>EditarPedidoWindow.xaml</DependentUpon>
@@ -78,6 +83,10 @@
       <DependentUpon>ListarProdutos.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\Pedidos\AdicionarPedidoWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Pedidos\DetalhePedido.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

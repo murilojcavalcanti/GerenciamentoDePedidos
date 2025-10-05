@@ -1,0 +1,83 @@
+﻿<Window x:Class="GerenciamentoDePedidos.Views.Pedidos.DetalhePedido"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Detalhes do Pedido" Height="500" Width="600"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#FAFAFA">
+
+    <Border BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="8" Padding="15" Margin="10" Background="White">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Cabeçalho -->
+                <RowDefinition Height="Auto"/>
+                <!-- Detalhes -->
+                <RowDefinition Height="*"/>
+                <!-- Lista de produtos -->
+                <RowDefinition Height="Auto"/>
+                <!-- Rodapé -->
+            </Grid.RowDefinitions>
+
+            <!-- Título -->
+            <TextBlock Text="📦 Detalhes do Pedido"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       Foreground="#2D2D2D"
+                       Margin="0,0,0,15"
+                       HorizontalAlignment="Center"
+                       Grid.Row="0"/>
+
+            <!-- Informações do Pedido -->
+            <Grid Grid.Row="1" Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Text="ID:" FontWeight="Bold" Margin="0,0,0,8"/>
+                    <TextBlock Text="Cliente:" FontWeight="Bold" Margin="0,0,0,8"/>
+                    <TextBlock Text="Data da Venda:" FontWeight="Bold" Margin="0,0,0,8"/>
+                    <TextBlock Text="Forma de Pagamento:" FontWeight="Bold" Margin="0,0,0,8"/>
+                    <TextBlock Text="Status:" FontWeight="Bold" Margin="0,0,0,8"/>
+                    <TextBlock Text="Valor Total:" FontWeight="Bold" Margin="0,0,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock x:Name="TxtId" Margin="0,0,0,8"/>
+                    <TextBlock x:Name="TxtNomePessoa" Margin="0,0,0,8"/>
+                    <TextBlock x:Name="TxtDataVenda" Margin="0,0,0,8"/>
+                    <TextBlock x:Name="TxtFormaPagamento" Margin="0,0,0,8"/>
+                    <TextBlock x:Name="TxtStatusVenda" Margin="0,0,0,8"/>
+                    <TextBlock x:Name="TxtValorTotal" Foreground="#007ACC" FontWeight="Bold"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Lista de Produtos -->
+            <GroupBox Header="Produtos do Pedido" Grid.Row="2" FontWeight="Bold">
+                <ListView x:Name="ProdutosListView" Margin="0,5,0,0">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Produto" DisplayMemberBinding="{Binding Nome}" Width="220"/>
+                            <GridViewColumn Header="Quantidade" DisplayMemberBinding="{Binding Quantidade}" Width="100"/>
+                            <GridViewColumn Header="Preço Unitário" DisplayMemberBinding="{Binding PrecoUnitario, StringFormat=C}" Width="120"/>
+                            <GridViewColumn Header="Subtotal" DisplayMemberBinding="{Binding Subtotal, StringFormat=C}" Width="120"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </GroupBox>
+
+            <!-- Rodapé -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+                <Button Content="Fechar"
+                        Width="100" Height="35"
+                        Background="#007ACC" Foreground="White"
+                        FontWeight="Bold"
+                        BorderBrush="#007ACC"
+                        Cursor="Hand"
+                        Click="BtnFechar_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

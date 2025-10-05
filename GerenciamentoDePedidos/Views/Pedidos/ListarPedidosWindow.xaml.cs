@@ -9,7 +9,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
-using Sys7tem.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
@@ -34,8 +33,10 @@ namespace GerenciamentoDePedidos.Views.Pedidos
 
         private void CarregarFiltros()
         {
-            FiltroStatus.ItemsSource = System.Enum.GetValues(typeof(EnumStatusVenda));
-            FiltroStatus.SelectedIndex = -1;
+            var statusList = new List<object> { null };
+            statusList.AddRange(System.Enum.GetValues(typeof(EnumStatusVenda)).Cast<object>());
+            FiltroStatus.ItemsSource = statusList;
+            FiltroStatus.SelectedIndex = 0;
         }
 
         private void CarregarPedidos()
@@ -93,14 +94,30 @@ namespace GerenciamentoDePedidos.Views.Pedidos
                 return;
             }
 
-            // Usa reflexão para obter o Id do pedido selecionado
+            // Usa reflexão para obter o Id e o Status do pedido selecionado
             var idProperty = pedidoView.GetType().GetProperty("Id");
-            if (idProperty == null)
+            var statusProperty = pedidoView.GetType().GetProperty("StatusVenda");
+
+            if (idProperty == null || statusProperty == null)
             {
                 MessageBox.Show("Erro ao obter o pedido selecionado.");
                 return;
             }
+
             int idPedido = (int)idProperty.GetValue(pedidoView);
+            string status = statusProperty.GetValue(pedidoView)?.ToString();
+
+            // ✅ Validação do status
+            if (string.Equals(status, "Recebido", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show(
+                    "Não é possível editar um pedido com status 'Recebido'.",
+                    "Edição bloqueada",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning
+                );
+                return;
+            }
 
             // Abre a janela de edição passando apenas o id do pedido
             var janela = new EditarPedidoWindow(idPedido);
@@ -144,9 +161,34 @@ namespace GerenciamentoDePedidos.Views.Pedidos
             }
 
             // Remove do repositório e atualiza a lista
-            DatabaseRepository.ExcluirPedido(idPedido);
+            DatabaseRepository.RemoverPedido(idPedido);
             CarregarPedidos();
             MessageBox.Show("Pedido excluído com sucesso.");
         }
+        private void BtnDetailsPedido_Click(object sender, RoutedEventArgs e)
+        {
+            // Obtém o objeto anônimo do DataContext
+            var pedidoView = ((FrameworkElement)sender).DataContext;
+            if (pedidoView == null)
+            {
+                MessageBox.Show("Nenhum pedido selecionado.");
+                return;
+            }
+
+            // Usa reflexão para obter o Id do pedido selecionado
+            var idProperty = pedidoView.GetType().GetProperty("Id");
+            if (idProperty == null)
+            {
+                MessageBox.Show("Erro ao obter o pedido selecionado.");
+                return;
+            }
+            int idPedido = (int)idProperty.GetValue(pedidoView);
+
+
+            // Abre a janela de detalhes passando o pedido
+            var detalhesWindow = new DetalhePedido(idPedido);
+            detalhesWindow.ShowDialog();
+        }
+
     }
 }

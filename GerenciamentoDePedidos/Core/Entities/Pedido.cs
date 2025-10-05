@@ -10,17 +10,20 @@ namespace GerenciamentoDePedidos.Core.Entities
 {
     public class Pedido
     {
-        public Pedido() { }
+        public Pedido()
+        {
+            Produtos = new List<PedidoProduto>();
+        }
 
-        public Pedido(int id, int idPessoa, List<int> idProdutos, EnumFormaPagamento formaPagamento, EnumStatusVenda statusVenda = EnumStatusVenda.Pendente)
+        public Pedido(int id, int idPessoa, List<PedidoProduto> produtos, EnumFormaPagamento formaPagamento, EnumStatusVenda statusVenda = EnumStatusVenda.Pendente)
         {
             Id = id;
             IdPessoa = idPessoa;
-            IdProdutos = idProdutos;
+            Produtos = produtos ?? new List<PedidoProduto>();
             DataVenda = DateTime.Now;
             FormaPagamento = formaPagamento;
             StatusVenda = statusVenda;
-            CalcularValorTotal();
+            ValorTotal = CalcularValorTotal();
         }
 
         [Key]
@@ -28,7 +31,7 @@ namespace GerenciamentoDePedidos.Core.Entities
         [Required]
         public int IdPessoa { get; set; }
         [Required]
-        public List<int> IdProdutos { get; set; }
+        public List<PedidoProduto> Produtos { get; set; }
         [Required]
         public DateTime DataVenda { get; set; }
         [Required]
@@ -37,32 +40,48 @@ namespace GerenciamentoDePedidos.Core.Entities
         public EnumStatusVenda StatusVenda { get; set; }
 
         public decimal ValorTotal { get; set; }
-        // ValorTotal é calculado sob demanda
+
         public decimal CalcularValorTotal()
         {
-            var todosProdutos = DatabaseRepository.CarregarProdutos().Where(p=>IdProdutos.Contains(p.Id));
-            if (IdProdutos == null || todosProdutos == null)
+            if (Produtos == null || Produtos.Count == 0)
                 return 0;
 
-            
-            return todosProdutos
-                .Where(p => IdProdutos.Contains(p.Id))
-                .Sum(p => p.Valor);
+            var todosProdutos = DatabaseRepository.CarregarProdutos();
+            decimal total = 0;
+
+            foreach (var pedidoProduto in Produtos)
+            {
+                var produto = todosProdutos.FirstOrDefault(p => p.Id == pedidoProduto.IdProduto);
+                if (produto != null)
+                {
+                    total += produto.Valor * pedidoProduto.Quantidade;
+                }
+            }
+            return total;
         }
 
-        public void AdicionarProduto(int idProduto)
+        public void AdicionarProduto(PedidoProduto pedidoProduto)
         {
-            if (!IdProdutos.Contains(idProduto))
+            if (Produtos == null)
+                Produtos = new List<PedidoProduto>();
+
+            var existente = Produtos.FirstOrDefault(p => p.IdProduto == pedidoProduto.IdProduto);
+            if (existente != null)
             {
-                IdProdutos.Add(idProduto);
+                existente.Quantidade += pedidoProduto.Quantidade;
+            }
+            else
+            {
+                Produtos.Add(pedidoProduto);
             }
         }
 
         public void RemoverProduto(int idProduto)
         {
-            if (IdProdutos.Contains(idProduto))
+            var produto = Produtos?.FirstOrDefault(p => p.IdProduto == idProduto);
+            if (produto != null)
             {
-                IdProdutos.Remove(idProduto);
+                Produtos.Remove(produto);
             }
         }
 
@@ -72,11 +91,11 @@ namespace GerenciamentoDePedidos.Core.Entities
                 throw new ArgumentNullException(nameof(novoPedido));
 
             IdPessoa = novoPedido.IdPessoa;
-            IdProdutos = new List<int>(novoPedido.IdProdutos ?? IdProdutos);
+            Produtos = new List<PedidoProduto>(novoPedido.Produtos ?? new List<PedidoProduto>());
             DataVenda = novoPedido.DataVenda;
             FormaPagamento = novoPedido.FormaPagamento;
             StatusVenda = novoPedido.StatusVenda;
-            CalcularValorTotal();
+            ValorTotal = CalcularValorTotal();
         }
     }
 }

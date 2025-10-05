@@ -63,16 +63,22 @@ namespace GerenciamentoDePedidos.Infra
             db.Pedidos.Add(pedido);
             SalvarDatabase(db);
         }
-        public static void AtualizarPedido(Pedido pedido)
+        public static void AtualizarPedido(Pedido pedidoAtualizado)
         {
-            // Exemplo simples: substitua pelo seu mecanismo real de persistência
+            // Carrega o banco completo
             var db = CarregarDatabase();
-            var pedidoToUpdate = CarregarPedidos().First(p=>p.Id==pedido.Id);
-            if (pedidoToUpdate != null)
+
+            // Localiza o pedido dentro do banco atual
+            var pedidoExistente = db.Pedidos.FirstOrDefault(p => p.Id == pedidoAtualizado.Id);
+
+            if (pedidoExistente != null)
             {
-                pedidoToUpdate.Update(pedido);
-                SalvarDatabase(db);
+                // Atualiza os dados
+                pedidoExistente.Update(pedidoAtualizado);
             }
+
+            // Salva o mesmo objeto que foi alterado
+            SalvarDatabase(db);
         }
         public static void RemoverPedido(int idPedido)
         {
